@@ -1,0 +1,2 @@
+# Optional real MCP transport. The core demo has no dependencies.
+mcp==1.30.0

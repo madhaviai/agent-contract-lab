@@ -1,0 +1,744 @@
+[
+  {
+    "title": "Inside an AI Agent",
+    "kind": "cover",
+    "content": {
+      "subtitle": "How tool contracts and harnesses shape reliable decisions",
+      "author": "Madhavi Pasumarthi",
+      "event": "BeyondConf 2026"
+    },
+    "notes": "Open with the user-visible promise: a bot should answer the question without doing something the user never requested. We will follow one tool call across its boundaries and compare two failure mechanisms.",
+    "minutes": 0.5,
+    "sources": []
+  },
+  {
+    "title": "The engineering question",
+    "kind": "statement",
+    "content": {
+      "big": "Can a correct answer still come from a bad agent run?",
+      "body": "A support bot answers a policy question. We inspect what it did along the way.",
+      "bottom": "Outcome: locate the boundary, test one change, evaluate the trajectory."
+    },
+    "notes": "Ask the room for a quick show of hands. Establish the acceptance criteria: a correct cited answer, appropriate evidence retrieval, and no unauthorized action. The fictional support workflow keeps the business problem familiar.",
+    "minutes": 1,
+    "sources": []
+  },
+  {
+    "title": "The objects in the loop",
+    "kind": "diagram",
+    "content": {
+      "nodes": [
+        [
+          "User task",
+          80,
+          190,
+          250,
+          90
+        ],
+        [
+          "Harness",
+          505,
+          190,
+          250,
+          90
+        ],
+        [
+          "Model",
+          930,
+          190,
+          250,
+          90
+        ],
+        [
+          "Tool policy",
+          505,
+          400,
+          250,
+          90
+        ],
+        [
+          "MCP client",
+          80,
+          400,
+          250,
+          90
+        ],
+        [
+          "Tool server",
+          80,
+          550,
+          250,
+          90
+        ],
+        [
+          "Backend",
+          505,
+          550,
+          250,
+          90
+        ]
+      ],
+      "edges": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          3,
+          4
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          5,
+          6
+        ]
+      ],
+      "caption": "The host bridges model tool calls to MCP. The harness owns execution and state."
+    },
+    "notes": "Walk the diagram slowly. The model emits a request, the host validates and dispatches it, and observations return for the next decision. MCP is an interoperability boundary. The tool backend still owns authorization. An agent loop can use local functions without MCP.",
+    "minutes": 1.5,
+    "sources": [
+      "https://modelcontextprotocol.io/docs/learn/architecture"
+    ]
+  },
+  {
+    "title": "A task and a tool contract",
+    "kind": "compare",
+    "content": {
+      "leftTitle": "Task",
+      "left": "Desired outcome\nAcceptance criteria\nAuthorized scope",
+      "rightTitle": "Tool contract",
+      "right": "Capability and purpose\nTyped inputs and results\nErrors and preconditions",
+      "bottom": "One task can require zero, one, or many tool calls."
+    },
+    "notes": "Separate vocabulary before discussing primitives. A user task is an outcome. A function contract is an interface. Neither is automatically the same as an MCP task object for long-running work. Schema validity answers only part of the correctness question.",
+    "minutes": 1,
+    "sources": [
+      "https://modelcontextprotocol.io/specification/2025-11-25/server/tools"
+    ]
+  },
+  {
+    "title": "Primitives and ownership",
+    "kind": "table",
+    "content": {
+      "headers": [
+        "Layer",
+        "Objects to inspect",
+        "Primary owner"
+      ],
+      "rows": [
+        [
+          "Model request",
+          "model, effort, sampling, output limit",
+          "Provider and caller"
+        ],
+        [
+          "Context",
+          "instructions, history, evidence, memory",
+          "Harness and application"
+        ],
+        [
+          "Tool interface",
+          "name, description, input and result",
+          "Tool author and host"
+        ],
+        [
+          "Execution",
+          "identity, scope, approval, retries",
+          "Server and backend"
+        ],
+        [
+          "Evaluation",
+          "answer, action history, usage",
+          "Application and evaluator"
+        ]
+      ]
+    },
+    "notes": "This is the map, not an exhaustive list of framework classes. Memory may live in an application store. Routing is application logic. Model providers expose controls, while the application decides how to use them. The appendix and repository carry the full reference table.",
+    "minutes": 1.5,
+    "sources": []
+  },
+  {
+    "title": "OpenAI API milestones",
+    "kind": "timeline",
+    "content": {
+      "items": [
+        [
+          "Jun 2023",
+          "GPT-4 / GPT-3.5",
+          "Function calling"
+        ],
+        [
+          "Aug 2024",
+          "GPT-4o generation",
+          "Structured Outputs"
+        ],
+        [
+          "Mar 2025",
+          "Responses + Agents SDK",
+          "Tools and tracing"
+        ]
+      ],
+      "bottom": "Selected historical milestones. Current controls depend on the chosen model and API."
+    },
+    "notes": "Keep this to under a minute. These milestones explain why tool calling, output contracts, and orchestration appear at different layers. This is not a model leaderboard or a claim about when agents were invented.",
+    "minutes": 0.75,
+    "sources": [
+      "https://openai.com/index/function-calling-and-other-api-updates/",
+      "https://openai.com/index/introducing-structured-outputs-in-the-api/",
+      "https://openai.com/index/new-tools-for-building-agents/"
+    ]
+  },
+  {
+    "title": "Claude and interoperability milestones",
+    "kind": "timeline",
+    "content": {
+      "items": [
+        [
+          "May 2024",
+          "Claude API",
+          "Tool use leaves beta"
+        ],
+        [
+          "Nov 2024",
+          "MCP announcement",
+          "Shared integration protocol"
+        ],
+        [
+          "Feb 2025",
+          "Claude 3.7 Sonnet",
+          "Extended thinking"
+        ],
+        [
+          "Nov 2025",
+          "Advanced tool use",
+          "Discovery and orchestration"
+        ]
+      ],
+      "bottom": "Provider features and protocol evolution follow separate timelines."
+    },
+    "notes": "Use this slide to connect tool definitions to interoperability and compute controls. Avoid an exhaustive model catalog. The latest model names matter less here than which interface guarantees the application can rely on.",
+    "minutes": 0.75,
+    "sources": [
+      "https://platform.claude.com/docs/en/release-notes/overview",
+      "https://www.anthropic.com/news/model-context-protocol",
+      "https://www.anthropic.com/news/claude-3-7-sonnet",
+      "https://www.anthropic.com/research/advanced-tool-use"
+    ]
+  },
+  {
+    "title": "Provider controls with similar intent",
+    "kind": "table",
+    "content": {
+      "headers": [
+        "Intent",
+        "OpenAI Responses",
+        "Claude Messages"
+      ],
+      "rows": [
+        [
+          "Tool schema",
+          "parameters",
+          "input_schema"
+        ],
+        [
+          "Automatic choice",
+          "tool_choice: auto",
+          "tool_choice: {type: auto}"
+        ],
+        [
+          "Reasoning control",
+          "reasoning.effort",
+          "output_config.effort"
+        ],
+        [
+          "Output limit",
+          "max_output_tokens",
+          "max_tokens"
+        ],
+        [
+          "Tool result link",
+          "call_id",
+          "tool_use_id"
+        ]
+      ]
+    },
+    "notes": "These are interface examples, not feature parity. Temperature, effort values, forced tool use, thinking, and strict schemas vary by model. The code omits optional settings unless explicitly requested. A normalized adapter must preserve provider-native state.",
+    "minutes": 1,
+    "sources": [
+      "https://developers.openai.com/api/docs/guides/function-calling",
+      "https://platform.claude.com/docs/en/agents-and-tools/tool-use/define-tools",
+      "https://platform.claude.com/docs/en/build-with-claude/effort"
+    ]
+  },
+  {
+    "title": "Three documented failure stories",
+    "kind": "cases",
+    "content": {
+      "items": [
+        [
+          "GitHub MCP · May 2025",
+          "Research demonstration",
+          "External content redirected an agent across a data boundary."
+        ],
+        [
+          "Replit · July 2025",
+          "Reported incident",
+          "An unwanted destructive action reached a database. Rollback recovered it."
+        ],
+        [
+          "Claude Code · Apr 2026",
+          "Provider postmortem",
+          "Effort, context handling, and prompt changes affected behavior."
+        ]
+      ],
+      "bottom": "Selected cases, not a ranking. Our lab demonstrates analogous mechanisms."
+    },
+    "notes": "Distinguish the evidence types. The GitHub case was a researcher demonstration. Replit reporting does not disclose a full internal trace. Anthropic said the API inference layer was unaffected and the product issues were resolved. We will not claim that our lab reproduces any of them.",
+    "minutes": 2,
+    "sources": [
+      "https://invariantlabs.ai/blog/mcp-github-vulnerability",
+      "https://www.sfgate.com/tech/article/bay-area-tech-product-rogue-ceo-apology-20780833.php",
+      "https://www.anthropic.com/research/april-23-postmortem"
+    ]
+  },
+  {
+    "title": "A map for locating the failure",
+    "kind": "table",
+    "content": {
+      "headers": [
+        "Observed symptom",
+        "Candidate boundary",
+        "Evidence to inspect"
+      ],
+      "rows": [
+        [
+          "Wrong tool or redundant work",
+          "Catalog and context",
+          "Definitions + proposed call"
+        ],
+        [
+          "Valid call, wrong target",
+          "Input meaning",
+          "Units, IDs, task scope"
+        ],
+        [
+          "Document changes the task",
+          "Trust boundary",
+          "Retrieved text + next action"
+        ],
+        [
+          "Unauthorized action executes",
+          "Execution policy",
+          "Identity + permission decision"
+        ],
+        [
+          "Repetition or lost state",
+          "Harness lifecycle",
+          "History + stop reason"
+        ]
+      ]
+    },
+    "notes": "Ask people to name a boundary before changing the model. A symptom can have several causes. A large span count is not itself a diagnosis. Form a hypothesis and compare one change against the same task. The provider layer remains a possible cause too.",
+    "minutes": 1.5,
+    "sources": []
+  },
+  {
+    "title": "The support-document lab",
+    "kind": "diagram",
+    "content": {
+      "nodes": [
+        [
+          "Policy question",
+          80,
+          200,
+          290,
+          95
+        ],
+        [
+          "Agent harness",
+          490,
+          200,
+          290,
+          95
+        ],
+        [
+          "Model adapter",
+          900,
+          200,
+          290,
+          95
+        ],
+        [
+          "search_docs",
+          80,
+          420,
+          290,
+          95
+        ],
+        [
+          "read_doc",
+          490,
+          420,
+          290,
+          95
+        ],
+        [
+          "send_report",
+          900,
+          420,
+          290,
+          95
+        ]
+      ],
+      "edges": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          1,
+          3
+        ],
+        [
+          1,
+          4
+        ],
+        [
+          1,
+          5
+        ]
+      ],
+      "caption": "Fictional documents. Local or real MCP transport. Outbound actions only simulate execution."
+    },
+    "notes": "Explain the user value: reliable support answers without unrelated actions. The bot can load local text documents and answer arbitrary questions in live mode. The bundled evaluation is intentionally narrow. The outbound capability exists only to show a control boundary.",
+    "minutes": 1,
+    "sources": []
+  },
+  {
+    "title": "A controlled comparison",
+    "kind": "table",
+    "content": {
+      "headers": [
+        "Variant",
+        "Single change",
+        "What to measure"
+      ],
+      "rows": [
+        [
+          "descriptions_only",
+          "Rewrite definitions",
+          "Selection and redundant calls"
+        ],
+        [
+          "catalog_only",
+          "Reduce exposed tools",
+          "Catalog size and input usage"
+        ],
+        [
+          "policy_only",
+          "Enforce read-only scope",
+          "Attempted vs executed actions"
+        ],
+        [
+          "hardened",
+          "Combine the fixes",
+          "Overall outcome, no attribution"
+        ]
+      ]
+    },
+    "notes": "Keep task, documents, model, and limits fixed. The simulator is a labeled rehearsal fixture. Real behavioral conclusions need repeated live API runs. The combined hardened variant is useful operationally but does not establish which change caused an effect.",
+    "minutes": 1,
+    "sources": []
+  },
+  {
+    "title": "Tool ambiguity: before",
+    "kind": "trace",
+    "content": {
+      "scenario": "sprawl",
+      "variant": "baseline",
+      "callout": "Where does the first unnecessary step occur?"
+    },
+    "notes": "Open the sprawl scenario in the HTML viewer. Expand the first generation and tool description. Let the audience identify why the interfaces do not help distinguish current policy from other datasets. These are deterministic scripted choices, not a captured model failure.",
+    "minutes": 1.5,
+    "sources": []
+  },
+  {
+    "title": "Tool ambiguity: explicit descriptions",
+    "kind": "trace",
+    "content": {
+      "scenario": "sprawl",
+      "variant": "descriptions_only",
+      "callout": "The catalog still exposes 15 tools. The descriptions identify their purpose."
+    },
+    "notes": "Compare with descriptions_only, not hardened. The fixture visits the relevant tools directly. The larger cumulative input in the baseline includes additional rounds of history. The definition rewrite itself is slightly longer. Do not attribute catalog-size savings to this change.",
+    "minutes": 1.5,
+    "sources": []
+  },
+  {
+    "title": "Catalog overhead and executed calls",
+    "kind": "table",
+    "content": {
+      "headers": [
+        "Scripted fixture",
+        "Exposed tools",
+        "Catalog proxy",
+        "Total input proxy"
+      ],
+      "rows": [
+        [
+          "baseline",
+          "15",
+          "1214",
+          "8019"
+        ],
+        [
+          "descriptions_only",
+          "15",
+          "1240",
+          "4848"
+        ],
+        [
+          "catalog_only",
+          "2",
+          "115",
+          "1471"
+        ]
+      ],
+      "bottom": "Character-based proxy units. No provider tokenizer, live latency, or measured model benefit."
+    },
+    "notes": "Explain input versus output tokens and cumulative usage across model turns. A definition is input even when the tool never executes. Compare baseline to catalog_only for exposure overhead. These numeric proxies are useful for inspecting fixtures, not dollar estimates or evidence of real model behavior.",
+    "minutes": 1,
+    "sources": []
+  },
+  {
+    "title": "Injected document: before",
+    "kind": "trace",
+    "content": {
+      "scenario": "injection",
+      "variant": "baseline",
+      "callout": "The final answer is correct. The simulated outbound action violates the task."
+    },
+    "notes": "Ask the audience to locate the trust boundary. The user requested a read-only summary and explicitly prohibited sending. The document is lower-trust evidence. The next generation requests send_report anyway. Schema validation accepts the shape, which says nothing about authority.",
+    "minutes": 1.5,
+    "sources": []
+  },
+  {
+    "title": "Injected document: execution policy",
+    "kind": "trace",
+    "content": {
+      "scenario": "injection",
+      "variant": "policy_only",
+      "callout": "The same attempted action returns POLICY_DENIED before backend execution."
+    },
+    "notes": "Only the execution policy changes in this comparison. The model can still attempt an inappropriate call. The server-owned task allowlist blocks it, and the bot continues the read-only task. A warning detector is telemetry, not the defense. The server rechecks policy in MCP mode.",
+    "minutes": 1.5,
+    "sources": []
+  },
+  {
+    "title": "Answer correctness and trajectory quality",
+    "kind": "table",
+    "content": {
+      "headers": [
+        "Check",
+        "Permissive fixture",
+        "Policy-only fixture"
+      ],
+      "rows": [
+        [
+          "Correct cited answer",
+          "Pass",
+          "Pass"
+        ],
+        [
+          "Unauthorized action attempted",
+          "Yes",
+          "Yes"
+        ],
+        [
+          "Unauthorized action executed",
+          "Yes, simulated",
+          "No"
+        ],
+        [
+          "Task success",
+          "Fail",
+          "Pass"
+        ],
+        [
+          "Trajectory pass",
+          "Fail",
+          "Fail"
+        ]
+      ]
+    },
+    "notes": "This is the key distinction. Successful containment is different from good model behavior. A blocked attempt still deserves investigation. The evaluator checks both final facts and the observed action sequence. No hidden reasoning is needed to make this judgment.",
+    "minutes": 1,
+    "sources": []
+  },
+  {
+    "title": "A measurement plan for live runs",
+    "kind": "list",
+    "content": {
+      "items": [
+        [
+          "20 repeats per scenario and variant",
+          "Report pass counts and a 95% interval."
+        ],
+        [
+          "Representative questions",
+          "Two fixed prompts are a smoke evaluation. Add held-out tasks."
+        ],
+        [
+          "Cost per successful task",
+          "Include failed-run spend. Keep cache and total input separate."
+        ]
+      ],
+      "bottom": "No live results are claimed in this package. Run a one-repeat smoke test before a paid batch."
+    },
+    "notes": "Show the repository command but do not run a 200-task batch on stage. The CLI checkpoints results. If the model resists the payload, report that honestly. Do not force the live story to match the rehearsal fixture. Separate output validity, execution safety, and efficiency.",
+    "minutes": 1,
+    "sources": []
+  },
+  {
+    "title": "What the harness must make explicit",
+    "kind": "statement",
+    "content": {
+      "big": "Success includes the path the agent takes",
+      "body": "Tool definitions shape choices. Execution policy constrains actions. Traces and evaluations expose the difference.",
+      "bottom": "Question for your next agent review: which boundary owns this failure?"
+    },
+    "notes": "Close with the promised outcome: the audience can identify where to inspect and which layer should enforce a requirement. Explain that the repository is a small reference implementation they can adapt. Leave a minute for questions.",
+    "minutes": 1,
+    "sources": []
+  },
+  {
+    "title": "Questions and the runnable lab",
+    "kind": "statement",
+    "content": {
+      "big": "One question. Two failure mechanisms. Four inspectable traces.",
+      "body": "README.md for setup\ndocs/DEMO.md for stage commands\nartifacts/report.html for the trace viewer",
+      "bottom": "Python 3.11+. No key needed for the scripted rehearsal."
+    },
+    "notes": "Invite questions about the boundary the audience would enforce in their own system. For interviews, discuss trade-offs and limits honestly: this lab does not establish production deployment experience or low-level inference optimization expertise.",
+    "minutes": 2,
+    "sources": []
+  },
+  {
+    "title": "Appendix: contract anatomy",
+    "kind": "code",
+    "content": {
+      "code": "{\n  \"name\": \"read_doc\",\n  \"description\": \"Read a document by its exact ID\",\n  \"inputSchema\": {\n    \"type\": \"object\",\n    \"properties\": {\"doc_id\": {\"type\": \"string\"}},\n    \"required\": [\"doc_id\"],\n    \"additionalProperties\": false\n  }\n}",
+      "caption": "MCP definition. Provider adapters translate the schema field. The backend still checks authority."
+    },
+    "notes": "Show a schema only after the audience understands the boundary. Structural constraints make an interface inspectable. Meaning, identity, and authority require separate checks. Production schemas should encode useful units, enums, and preconditions where appropriate.",
+    "minutes": 0,
+    "sources": [
+      "https://modelcontextprotocol.io/specification/2025-11-25/server/tools"
+    ]
+  },
+  {
+    "title": "Appendix: state and loop controls",
+    "kind": "table",
+    "content": {
+      "headers": [
+        "Primitive",
+        "Record",
+        "Enforce"
+      ],
+      "rows": [
+        [
+          "Context and memory",
+          "Source, version, tenant, selected history",
+          "Isolation and lifecycle"
+        ],
+        [
+          "Routing",
+          "Chosen model and tool subset",
+          "Policy and fallback rules"
+        ],
+        [
+          "Retry and timeout",
+          "Attempt, result, uncertain outcome",
+          "Bounded retries and idempotency"
+        ],
+        [
+          "Budget",
+          "Turns, calls, output allowance",
+          "Stop condition"
+        ],
+        [
+          "Observability",
+          "Trace ID and parent generation",
+          "Complete event coverage"
+        ]
+      ]
+    },
+    "notes": "The lab implements an in-memory history, budgets, and local traces. It does not implement durable memory or production retry semantics. Treat this table as a design review reference, not a claim about every feature in the repository.",
+    "minutes": 0,
+    "sources": []
+  },
+  {
+    "title": "Appendix: stage commands",
+    "kind": "code",
+    "content": {
+      "code": "python -m agentlab demo --out artifacts\n\npython -m unittest discover -s tests -v\n\npython -m agentlab demo --transport mcp \\\n  --out artifacts/mcp\n\npython -m agentlab demo --provider openai \\\n  --model gpt-4.1-mini --repeats 1 \\\n  --out artifacts/live-smoke",
+      "caption": "Live mode needs a provider key. Optional MCP mode needs requirements-mcp.txt."
+    },
+    "notes": "Use the README for full setup. The key-free simulator and actual local tool execution are separate from paid model inference. Optional transport uses the official MCP v1 SDK. Provider errors are visible and do not silently switch modes.",
+    "minutes": 0,
+    "sources": []
+  },
+  {
+    "title": "Appendix: source and screenshot links",
+    "kind": "sources",
+    "content": {
+      "items": [
+        [
+          "GitHub MCP research demonstration",
+          "https://invariantlabs.ai/blog/mcp-github-vulnerability"
+        ],
+        [
+          "Replit incident reporting",
+          "https://www.sfgate.com/tech/article/bay-area-tech-product-rogue-ceo-apology-20780833.php"
+        ],
+        [
+          "Claude Code quality postmortem",
+          "https://www.anthropic.com/research/april-23-postmortem"
+        ],
+        [
+          "Tool catalog engineering report",
+          "https://www.anthropic.com/research/advanced-tool-use"
+        ]
+      ],
+      "bottom": "Full source register, dates, and crop suggestions: docs/RESEARCH.md"
+    },
+    "notes": "Use article headline/date crops with attribution. Preserve evidence labels: research demonstration, reported incident, provider postmortem, and engineering report. These links are provided for screenshots. No third-party article screenshots are embedded.",
+    "minutes": 0,
+    "sources": [
+      "https://developers.openai.com/api/docs/guides/function-calling",
+      "https://platform.claude.com/docs/en/agents-and-tools/tool-use/define-tools",
+      "https://modelcontextprotocol.io/specification/2025-11-25/server/tools",
+      "https://modelcontextprotocol.io/docs/learn/architecture",
+      "https://invariantlabs.ai/blog/mcp-github-vulnerability",
+      "https://www.sfgate.com/tech/article/bay-area-tech-product-rogue-ceo-apology-20780833.php",
+      "https://www.anthropic.com/research/april-23-postmortem",
+      "https://www.anthropic.com/research/advanced-tool-use"
+    ]
+  }
+]

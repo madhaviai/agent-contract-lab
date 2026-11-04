@@ -1,0 +1,12 @@
+cd /Users/madhavik/Downloads/agent-contract-lab
+source .venv/bin/activate
+python -m agentlab.reasoning
+
+
+export LANGFUSE_SECRET_KEY="sk-lf-6f3d55ed-adc4-427d-8d9c-42a9dbd0c6fd"
+export LANGFUSE_PUBLIC_KEY="pk-lf-43eff17e-38cb-4660-86a7-c6a3b941d3c0"
+export LANGFUSE_BASE_URL="http://localhost:3000"
+python -m agentlab.reasoning --langfuse
+
+
+What is the refund window for a paid subscription?
